@@ -10,6 +10,13 @@ pub struct MemoryBlockStore {
     blocks: Mutex<HashMap<Cid, Block>>
 }
 
+impl Clone for MemoryBlockStore {
+    fn clone(&self) -> Self {
+        let map = self.blocks.lock().unwrap();
+        Self { blocks: Mutex::new(map.clone()) }
+    }
+}
+
 impl MemoryBlockStore {
     pub fn new() -> Self {
         Self { blocks: Mutex::new(HashMap::new()) }

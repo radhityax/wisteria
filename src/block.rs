@@ -1,6 +1,6 @@
-use anyhow::{Result, ensure};
+use anyhow::Result;
 use bytes::Bytes;
-use cid::{Cid, Version};
+use cid::Cid;
 use multihash::Multihash;
 use multihash_codetable::{Code, MultihashDigest};
 

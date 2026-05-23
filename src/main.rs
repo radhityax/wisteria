@@ -1,26 +1,46 @@
-use ksh::block::Block;
+use std::sync::Arc;
+use bytes::Bytes;
 use ksh::store::memory::MemoryBlockStore;
-use ksh::store::BlockStore;
-
-const DATA: &[u8] = b"the other woman will never have his love to keep\n\
-and as the years go by, the other woman will spend her life alone";
+use ksh::chunker::fixed::FixedChunker;
+use ksh::dag::{DagBuilder, DagResolver};
+use ksh::pin::{PinManager, PinMode};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let store = MemoryBlockStore::new();
+    let store = Arc::new(MemoryBlockStore::new());
 
-    let block = Block::new(DATA).unwrap();
+    let builder = DagBuilder::new(
+        store.clone(),
+        Box::new(FixedChunker::new(256 * 1024)),
+    );
+    let resolver = DagResolver::new(store);
 
-    println!("Data: {}", String::from_utf8_lossy(block.data()));
-    println!("CID: {}", block.cid());
+    let data = Bytes::from(vec![0xABu8; 1024]);
+    let root = builder.add_bytes(data.clone()).await?;
+    println!("Root CID (1KB): {}", root);
 
-    store.put(&block).await?;
-    assert!(store.has(block.cid()).await?);
+    let result: Bytes = resolver.cat(&root).await?;
+    assert_eq!(result.len(), 1024);
+    assert_eq!(result[0], 0xAB);
+    println!("Cat OK - {} bytes", result.len());
 
-    let retrieved = store.get(block.cid()).await?.unwrap();
-    assert_eq!(retrieved.data(), block.data());
-    assert!(retrieved.verify()?);
+    let big_data = Bytes::from(vec![0x42u8; 512 * 1024]);
+    let root2 = builder.add_bytes(big_data.clone()).await?;
+    println!("Root CID (512KB): {}", root2);
 
-    println!("kshblock works!");
+    let result2: Bytes = resolver.cat(&root2).await?;
+    assert_eq!(result2.len(), 512 * 1024);
+    println!("Multi chunk cat OK - {} bytes", result2.len());
+
+    let pinner = PinManager::new();
+    pinner.pin(root, PinMode::Recursive)?;
+    pinner.pin(root2, PinMode::Direct)?;
+    println!("Pinned: {:?}", pinner.list());
+
+    assert!(pinner.is_pinned(&root));
+    assert!(pinner.is_pinned(&root2));
+    pinner.unpin(&root2)?;
+    assert!(!pinner.is_pinned(&root2));
+    println!("PinManager works!");
     Ok(())
 }
