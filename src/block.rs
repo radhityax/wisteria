@@ -19,7 +19,6 @@ impl Block {
         let cid = Cid::new_v1(0x55, mh);
         Ok(Self { cid, data })
     }
-
     /* create block from cid + data that we have knew (without hash) :) */
     pub fn from_parts(cid: Cid, data: Bytes) -> Self {
         Self { cid, data }
