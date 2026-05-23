@@ -1,0 +1,36 @@
+[package]
+name = "ksh"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+async-trait = "0.1"
+
+cid = "0.11"
+multihash = "0.19"
+multihash-codetable = { version = "0.2", features = ["sha2"] }
+multibase = "0.9"
+unsigned-varint = "0.8"
+
+sled = "0.34"
+
+libp2p = { version = "0.56", default-features = false, features = [
+    "tcp",
+        "tokio",
+        "dns",
+        "kad",
+        "identify",
+        "ping",
+        "noise",
+        "yamux",
+        "mdns",
+        "macros",
+]}
+
+anyhow = "1"
+bytes = "1"
+
+log = "0.4"
+env_logger = "0.11"
