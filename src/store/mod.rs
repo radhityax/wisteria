@@ -1,4 +1,5 @@
 pub mod memory;
+pub mod sled;
 use async_trait::async_trait;
 use anyhow::Result;
 use crate::block::Block;

@@ -6,9 +6,23 @@ use libp2p::Multiaddr;
 
 use crate::block::{Block, parse_cid};
 use crate::store::BlockStore;
-use crate::store::memory::MemoryBlockStore;
+use crate::store::sled::SledBlockStore;
 use crate::pin::{PinManager, PinMode};
 use crate::p2p::P2pNode;
+
+fn default_store() -> Arc<dyn BlockStore> {
+    let path = dirs_or_default();
+    Arc::new(SledBlockStore::new(&path).expect("failed to open sled store"))
+}
+
+fn dirs_or_default() -> String {
+    let home = std::env::var("KSHDIR").unwrap_or_else(|_| {
+        let base = std::env::var("HOME").unwrap_or_else(|_| "/tmp/ksh".into());
+        format!("{}/.ksh/store", base)
+    });
+    std::fs::create_dir_all(&home).ok();
+    format!("{}/blockstore", home)
+}
 
 pub fn print_usage() {
     eprintln!(r#"Usage: ksh-cli <command> [args]
@@ -30,7 +44,7 @@ pub async fn run() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 { print_usage(); return Ok(()); }
 
-    let store: Arc<dyn BlockStore> = Arc::new(MemoryBlockStore::new());
+    let store = default_store();
     let pinner = PinManager::new();
 
     match args[1].as_str() {
@@ -118,7 +132,9 @@ pub async fn run() -> Result<()> {
             node.add_address(peer, addr);
             tokio::time::sleep(Duration::from_millis(500)).await;
             node.request_block(peer, &cid);
+            let handle = tokio::spawn(async move { node.run().await });
             tokio::time::sleep(Duration::from_secs(3)).await;
+            handle.abort();
             match store.get(&cid).await? {
                 Some(b) => println!("got block: {}",
                     String::from_utf8_lossy(b.data())),
