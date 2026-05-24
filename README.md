@@ -9,7 +9,7 @@ compassionate
 it is probably an odd feeling to be lost in translation a lot of times.
 that is why this program exists.
 
-also, *ksh* is my learning platform about rust and decentralization storage.
+also, *wisteria* is my learning platform about rust and decentralization storage.
 
 usage
 ------
