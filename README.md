@@ -1,4 +1,4 @@
-ksh
+wisteria
 ====
 
 decentralized storage written in rust.
