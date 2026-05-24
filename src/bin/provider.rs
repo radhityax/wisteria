@@ -5,8 +5,6 @@ use std::sync::Arc;
 use ksh::store::BlockStore;
 use std::env;
 
-const DATA: &[u8] = b"be cruel to me, cause i'm a fool man for you";
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     env_logger::init();

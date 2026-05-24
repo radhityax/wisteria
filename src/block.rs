@@ -4,6 +4,7 @@ use cid::Cid;
 use multihash::Multihash;
 use multihash_codetable::{Code, MultihashDigest};
 
+
 #[derive(Debug, Clone)]
 pub struct Block {
     cid: Cid,
