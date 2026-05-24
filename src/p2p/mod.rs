@@ -55,6 +55,9 @@ impl P2pNode {
         Ok(())
     }
 
+    pub fn add_address(&mut self, peer_id: PeerId, addr: libp2p::Multiaddr) {
+        self.swarm.add_peer_address(peer_id, addr);
+    }
     pub fn dial(&mut self, addr: &str) -> Result<()> {
         let addr: libp2p::Multiaddr = addr.parse()?;
         self.swarm.dial(addr)?;
