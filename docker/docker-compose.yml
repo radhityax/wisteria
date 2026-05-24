@@ -1,0 +1,32 @@
+services:
+  node1:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "9001:9001/udp"
+      - "9001:9001/tcp"
+    environment:
+      - NODE_ROLE=provider
+      - KSHDIR=/data/ksh
+    volumes:
+      - shared:/shared
+      - node1_data:/data/ksh
+
+  node2:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    depends_on:
+      - node1
+    environment:
+      - NODE_ROLE=requester
+      - KSHDIR=/data/ksh
+    volumes:
+      - shared:/shared
+      - node2_data:/data/ksh
+
+volumes:
+  shared:
+  node1_data:
+  node2_data:
