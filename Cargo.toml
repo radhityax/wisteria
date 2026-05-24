@@ -27,6 +27,7 @@ libp2p = { version = "0.56", default-features = false, features = [
         "yamux",
         "mdns",
         "macros",
+        "request-response",
 ]}
 
 anyhow = "1"

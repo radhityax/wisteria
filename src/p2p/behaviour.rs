@@ -4,6 +4,7 @@ use libp2p::ping::{Behaviour as Ping, Config as PingConfig};
 use libp2p::swarm::NetworkBehaviour;
 use libp2p::identity::Keypair;
 
+use crate::p2p::bitswap::BitswapBehaviour;
 
 #[derive(NetworkBehaviour)]
 pub struct NodeBehaviour {
@@ -11,6 +12,7 @@ pub struct NodeBehaviour {
     pub identify: Identify,
     pub ping: Ping,
     pub mdns: libp2p::mdns::tokio::Behaviour,
+    pub bitswap: BitswapBehaviour,
 }
 
 impl NodeBehaviour {
@@ -29,6 +31,8 @@ impl NodeBehaviour {
             Default::default(), peer_id,
         )?;
 
-        Ok(Self { kademlia, identify, ping, mdns })
+        let bitswap = crate::p2p::bitswap::new_bitswap_behaviour();
+
+        Ok(Self { kademlia, identify, ping, mdns, bitswap })
     }
 }
